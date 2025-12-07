@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position Size Calculator</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX (Updated to latest version for modern syntax support) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        body { background-color: #1a1a1a; color: #e5e7eb; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .input-dark { background-color: #1e1e1e; border-color: #333; }
+        .input-dark:focus { border-color: #6b7280; outline: none; }
+        /* Animation utilities */
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-spin-custom { animation: spin 1s linear infinite; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+    </style>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Icon Components (SVG) ---
+        const CalculatorIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+        );
+        const InfoIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        );
+        const SparklesIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 3v4"/><path d="M3 7h4"/><path d="M3 5h4"/></svg>
+        );
+
+        const App = () => {
+            // State สำหรับเก็บค่าต่างๆ
+            const [balance, setBalance] = useState(10000);
+            const [riskPercent, setRiskPercent] = useState(2);
+            const [stopLossPercent, setStopLossPercent] = useState(3);
+            const [leverage, setLeverage] = useState(5);
+
+            const [positionSize, setPositionSize] = useState(0);
+            const [remainingTrades, setRemainingTrades] = useState(0);
+            const [riskAmount, setRiskAmount] = useState(0);
+
+            // AI State
+            const [aiAnalysis, setAiAnalysis] = useState("");
+            const [isLoading, setIsLoading] = useState(false);
+            const [showAnalysis, setShowAnalysis] = useState(false);
+
+            // ฟังก์ชันคำนวณ
+            useEffect(() => {
+                // 1. คำนวณจำนวนเงินที่ยอมเสียได้ (Risk Amount)
+                const riskAmt = balance * (riskPercent / 100);
+                setRiskAmount(riskAmt);
+
+                // 2. คำนวณ Position Size (Margin ที่ต้องใช้)
+                const slDecimal = stopLossPercent / 100;
+                
+                let calculatedMargin = 0;
+                if (slDecimal > 0 && leverage > 0) {
+                calculatedMargin = riskAmt / (slDecimal * leverage);
+                }
+
+                setPositionSize(calculatedMargin);
+
+                // 3. คำนวณโอกาสที่เหลือ (Remaining Chances)
+                if (riskAmt > 0) {
+                    const totalChances = Math.floor(balance / riskAmt);
+                    setRemainingTrades(Math.max(0, totalChances - 1));
+                } else {
+                    setRemainingTrades(0);
+                }
+
+            }, [balance, riskPercent, stopLossPercent, leverage]);
+
+            // ฟังก์ชันเรียก Gemini API
+            const analyzeRiskWithAI = async () => {
+                setIsLoading(true);
+                setShowAnalysis(true);
+                setAiAnalysis("");
+
+                const apiKey = ""; // API Key จะถูกใส่โดยอัตโนมัติขณะรันไทม์
+                const prompt = `
+                คุณคือผู้เชี่ยวชาญด้านการบริหารความเสี่ยงในการเทรด (Trading Risk Manager)
+                ช่วยวิเคราะห์การตั้งค่า Trade Setup นี้ให้หน่อย:
+                - Portfolio Balance: ${balance} USDT
+                - Risk per Trade: ${riskPercent}% (คิดเป็นเงิน ${riskAmount.toFixed(2)} USDT)
+                - Stop Loss Distance: ${stopLossPercent}%
+                - Leverage: ${leverage}x
+                - Calculated Position Size: ${positionSize.toFixed(2)} USDT
+
+                กรุณาตอบเป็นภาษาไทย สั้นกระชับ โดยระบุ:
+                1. ระดับความเสี่ยง (ต่ำ / ปานกลาง / สูง / อันตราย)
+                2. ความเห็นเกี่ยวกับ Leverage และ %Risk ที่ใช้ เหมาะสมหรือไม่
+                3. คำแนะนำสั้นๆ 1-2 ข้อ เพื่อความปลอดภัยของพอร์ต
+                `;
+
+                try {
+                    const response = await fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                        {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                        }),
+                        }
+                    );
+
+                    const data = await response.json();
+                    
+                    // Safe access to data without optional chaining for maximum compatibility
+                    let text = "ไม่สามารถวิเคราะห์ได้ในขณะนี้";
+                    if (data && data.candidates && data.candidates.length > 0 && 
+                        data.candidates[0].content && 
+                        data.candidates[0].content.parts && 
+                        data.candidates[0].content.parts.length > 0) {
+                        text = data.candidates[0].content.parts[0].text;
+                    }
+
+                    setAiAnalysis(text);
+                } catch (error) {
+                    console.error("Error calling Gemini API:", error);
+                    setAiAnalysis("เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            // Format ตัวเลขให้มี comma และทศนิยม 2 ตำแหน่ง
+            const formatNumber = (num) => {
+                return new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+                }).format(num);
+            };
+
+            return (
+                <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center p-4">
+                
+                <div className="w-full max-w-2xl bg-[#252525] rounded-lg shadow-xl border border-[#333] overflow-hidden">
+                    
+                    {/* Header */}
+                    <div className="p-6 border-b border-[#333]">
+                    <div className="flex items-center gap-3 mb-1">
+                        <CalculatorIcon className="w-6 h-6 text-gray-400" />
+                        <h1 className="text-xl font-medium text-gray-200">Position Size Calculator</h1>
+                    </div>
+                    <p className="text-gray-400 text-sm">
+                        เครื่องคิดเลขเพื่อช่วยคำนวน Position Size ของคุณก่อนเข้า Position
+                    </p>
+                    </div>
+
+                    {/* Form Content */}
+                    <div className="p-8 space-y-6">
+                    
+                    {/* Balance */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1 uppercase tracking-wider">
+                        My Portfolio Balance <span className="text-red-500">*</span>
+                        <InfoIcon className="w-3.5 h-3.5 inline-block ml-1 text-gray-500 cursor-help" />
+                        </label>
+                        <div className="md:col-span-7 relative">
+                        <input
+                            type="number"
+                            value={balance}
+                            onChange={(e) => setBalance(parseFloat(e.target.value) || 0)}
+                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
+                        />
+                        <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">|</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">USDT</span>
+                        </div>
+                    </div>
+
+                    {/* Risk of Ruin */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1 uppercase tracking-wider">
+                        % Risk of Ruin <span className="text-red-500">*</span>
+                        <InfoIcon className="w-3.5 h-3.5 inline-block ml-1 text-gray-500 cursor-help" />
+                        </label>
+                        <div className="md:col-span-7 relative">
+                        <input
+                            type="number"
+                            value={riskPercent}
+                            onChange={(e) => setRiskPercent(parseFloat(e.target.value) || 0)}
+                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
+                        />
+                        <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">|</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">%</span>
+                        </div>
+                    </div>
+
+                    {/* Stop Loss */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1 uppercase tracking-wider">
+                        % Stop Loss <span className="text-red-500">*</span>
+                        <InfoIcon className="w-3.5 h-3.5 inline-block ml-1 text-gray-500 cursor-help" />
+                        </label>
+                        <div className="md:col-span-7 relative">
+                        <input
+                            type="number"
+                            value={stopLossPercent}
+                            onChange={(e) => setStopLossPercent(parseFloat(e.target.value) || 0)}
+                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
+                        />
+                        <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">|</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">%</span>
+                        </div>
+                    </div>
+
+                    {/* Leverage */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1 uppercase tracking-wider">
+                        Leverage <span className="text-red-500">*</span>
+                        <InfoIcon className="w-3.5 h-3.5 inline-block ml-1 text-gray-500 cursor-help" />
+                        </label>
+                        <div className="md:col-span-7 relative">
+                        <input
+                            type="number"
+                            value={leverage}
+                            onChange={(e) => setLeverage(parseFloat(e.target.value) || 0)}
+                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
+                        />
+                        <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">|</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">X</span>
+                        </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-dashed border-[#444] my-6"></div>
+
+                    {/* Result Field */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <label className="md:col-span-5 text-sm font-bold text-gray-200 uppercase tracking-wider">
+                        Position Size
+                        </label>
+                        <div className="md:col-span-7 relative">
+                        <div className="w-full bg-[#2a2a2a] border border-[#333] rounded px-4 py-3 text-right text-white font-bold text-lg">
+                            {formatNumber(positionSize)}
+                        </div>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">USDT</span>
+                        </div>
+                    </div>
+
+                    {/* Summary Text */}
+                    <div className="mt-8 bg-[#1e1e1e] rounded-lg p-6 border border-[#333]">
+                        <ul className="space-y-3">
+                        <li className="flex items-start gap-2 text-gray-300">
+                            <span className="block w-1.5 h-1.5 mt-2 rounded-full bg-gray-400 shrink-0"></span>
+                            <span>
+                            Position Size ของคุณที่จะต้องเข้าในครั้งนี้คือ <span className="text-white font-bold">{formatNumber(positionSize)} USDT</span>
+                            </span>
+                        </li>
+                        <li className="flex items-start gap-2 text-gray-300">
+                            <span className="block w-1.5 h-1.5 mt-2 rounded-full bg-gray-400 shrink-0"></span>
+                            <span>
+                            หากคุณเทรดแล้วแพ้ในครั้งนี้ คุณจะเหลือโอกาสอีก <span className="text-white font-bold">{remainingTrades} ครั้ง</span>
+                            <br/>
+                            <span className="text-xs text-gray-500">(ความเสียหายสูงสุดต่อไม้: {formatNumber(riskAmount)} USDT)</span>
+                            </span>
+                        </li>
+                        </ul>
+                    </div>
+
+                    {/* Gemini AI Integration */}
+                    <div className="mt-4 pt-4 border-t border-[#333]">
+                        {!showAnalysis ? (
+                        <button
+                            onClick={analyzeRiskWithAI}
+                            className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/20"
+                        >
+                            <SparklesIcon className="w-4 h-4" />
+                            วิเคราะห์ความเสี่ยงด้วย AI (Gemini)
+                        </button>
+                        ) : (
+                        <div className="bg-[#2a2a2a] rounded-lg p-5 border border-indigo-500/30">
+                            <div className="flex items-center gap-2 mb-3 text-indigo-400 font-semibold">
+                            <SparklesIcon className="w-4 h-4" />
+                            <span>AI Risk Analysis</span>
+                            </div>
+                            
+                            {isLoading ? (
+                            <div className="flex items-center gap-3 text-gray-400 py-2">
+                                <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin-custom"></div>
+                                กำลังประมวลผลกลยุทธ์ของคุณ...
+                            </div>
+                            ) : (
+                            <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-line animate-fade-in">
+                                {aiAnalysis}
+                                <div className="mt-4 flex justify-end">
+                                <button 
+                                    onClick={() => setShowAnalysis(false)} 
+                                    className="text-xs text-gray-500 hover:text-gray-300 underline"
+                                >
+                                    ปิดคำแนะนำ
+                                </button>
+                                </div>
+                            </div>
+                            )}
+                        </div>
+                        )}
+                    </div>
+
+                    </div>
+                </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
