@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Position Size Calculator</title>
+    <title>เครื่องคำนวณขนาดไม้เทรด</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     
-    <!-- Babel for JSX (Updated to latest version for modern syntax support) -->
+    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Tailwind CSS -->
@@ -97,15 +97,15 @@
                 const prompt = `
                 คุณคือผู้เชี่ยวชาญด้านการบริหารความเสี่ยงในการเทรด (Trading Risk Manager)
                 ช่วยวิเคราะห์การตั้งค่า Trade Setup นี้ให้หน่อย:
-                - Portfolio Balance: ${balance} USDT
-                - Risk per Trade: ${riskPercent}% (คิดเป็นเงิน ${riskAmount.toFixed(2)} USDT)
-                - Stop Loss Distance: ${stopLossPercent}%
-                - Leverage: ${leverage}x
-                - Calculated Position Size: ${positionSize.toFixed(2)} USDT
+                - เงินทุนในพอร์ต (Portfolio Balance): ${balance} บาท
+                - ความเสี่ยงต่อไม้ (Risk per Trade): ${riskPercent}% (คิดเป็นเงิน ${riskAmount.toFixed(2)} บาท)
+                - ระยะ Stop Loss (Stop Loss Distance): ${stopLossPercent}%
+                - อัตราทด (Leverage): ${leverage}x
+                - ขนาดไม้เทรดที่คำนวณได้ (Calculated Position Size): ${positionSize.toFixed(2)} บาท
 
-                กรุณาตอบเป็นภาษาไทย สั้นกระชับ โดยระบุ:
+                กรุณาตอบเป็นภาษาไทย สั้นกระชับ แบบธรรมชาติ โดยระบุ:
                 1. ระดับความเสี่ยง (ต่ำ / ปานกลาง / สูง / อันตราย)
-                2. ความเห็นเกี่ยวกับ Leverage และ %Risk ที่ใช้ เหมาะสมหรือไม่
+                2. ความเห็นเกี่ยวกับ อัตราทด และ %ความเสี่ยง ที่ใช้ เหมาะสมหรือไม่
                 3. คำแนะนำสั้นๆ 1-2 ข้อ เพื่อความปลอดภัยของพอร์ต
                 `;
 
@@ -125,7 +125,7 @@
 
                     const data = await response.json();
                     
-                    // Safe access to data without optional chaining for maximum compatibility
+                    // Safe access to data
                     let text = "ไม่สามารถวิเคราะห์ได้ในขณะนี้";
                     if (data && data.candidates && data.candidates.length > 0 && 
                         data.candidates[0].content && 
@@ -145,7 +145,7 @@
 
             // Format ตัวเลขให้มี comma และทศนิยม 2 ตำแหน่ง
             const formatNumber = (num) => {
-                return new Intl.NumberFormat('en-US', {
+                return new Intl.NumberFormat('th-TH', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
                 }).format(num);
@@ -160,10 +160,10 @@
                     <div className="p-6 border-b border-[#333]">
                     <div className="flex items-center gap-3 mb-1">
                         <CalculatorIcon className="w-6 h-6 text-gray-400" />
-                        <h1 className="text-xl font-medium text-gray-200">Position Size Calculator</h1>
+                        <h1 className="text-xl font-medium text-gray-200">เครื่องคำนวณขนาดไม้เทรด</h1>
                     </div>
                     <p className="text-gray-400 text-sm">
-                        เครื่องคิดเลขเพื่อช่วยคำนวน Position Size ของคุณก่อนเข้า Position
+                        ช่วยคำนวณขนาดไม้เทรดที่เหมาะสมก่อนเข้าออเดอร์
                     </p>
                     </div>
 
@@ -172,8 +172,8 @@
                     
                     {/* Balance */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1 uppercase tracking-wider">
-                        My Portfolio Balance <span className="text-red-500">*</span>
+                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1">
+                        เงินทุนในพอร์ต <span className="text-red-500">*</span>
                         <InfoIcon className="w-3.5 h-3.5 inline-block ml-1 text-gray-500 cursor-help" />
                         </label>
                         <div className="md:col-span-7 relative">
@@ -181,17 +181,17 @@
                             type="number"
                             value={balance}
                             onChange={(e) => setBalance(parseFloat(e.target.value) || 0)}
-                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
+                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 pr-16 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
                         />
                         <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">|</span>
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">USDT</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">บาท</span>
                         </div>
                     </div>
 
                     {/* Risk of Ruin */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1 uppercase tracking-wider">
-                        % Risk of Ruin <span className="text-red-500">*</span>
+                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1">
+                        ความเสี่ยงต่อไม้ (%) <span className="text-red-500">*</span>
                         <InfoIcon className="w-3.5 h-3.5 inline-block ml-1 text-gray-500 cursor-help" />
                         </label>
                         <div className="md:col-span-7 relative">
@@ -199,7 +199,7 @@
                             type="number"
                             value={riskPercent}
                             onChange={(e) => setRiskPercent(parseFloat(e.target.value) || 0)}
-                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
+                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 pr-16 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
                         />
                         <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">|</span>
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">%</span>
@@ -208,8 +208,8 @@
 
                     {/* Stop Loss */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1 uppercase tracking-wider">
-                        % Stop Loss <span className="text-red-500">*</span>
+                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1">
+                        ระยะ Stop Loss (%) <span className="text-red-500">*</span>
                         <InfoIcon className="w-3.5 h-3.5 inline-block ml-1 text-gray-500 cursor-help" />
                         </label>
                         <div className="md:col-span-7 relative">
@@ -217,7 +217,7 @@
                             type="number"
                             value={stopLossPercent}
                             onChange={(e) => setStopLossPercent(parseFloat(e.target.value) || 0)}
-                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
+                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 pr-16 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
                         />
                         <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">|</span>
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">%</span>
@@ -226,8 +226,8 @@
 
                     {/* Leverage */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1 uppercase tracking-wider">
-                        Leverage <span className="text-red-500">*</span>
+                        <label className="md:col-span-5 text-sm font-semibold text-gray-300 flex items-center gap-1">
+                        อัตราทด (Leverage) <span className="text-red-500">*</span>
                         <InfoIcon className="w-3.5 h-3.5 inline-block ml-1 text-gray-500 cursor-help" />
                         </label>
                         <div className="md:col-span-7 relative">
@@ -235,7 +235,7 @@
                             type="number"
                             value={leverage}
                             onChange={(e) => setLeverage(parseFloat(e.target.value) || 0)}
-                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
+                            className="w-full bg-[#1e1e1e] border border-[#333] rounded px-4 py-3 pr-16 text-right text-gray-200 focus:outline-none focus:border-gray-500 transition-colors input-dark"
                         />
                         <span className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">|</span>
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">X</span>
@@ -247,14 +247,16 @@
 
                     {/* Result Field */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                        <label className="md:col-span-5 text-sm font-bold text-gray-200 uppercase tracking-wider">
-                        Position Size
+                        <label className="md:col-span-5 text-sm font-bold text-gray-200">
+                        ขนาดไม้เทรดที่แนะนำ
                         </label>
-                        <div className="md:col-span-7 relative">
-                        <div className="w-full bg-[#2a2a2a] border border-[#333] rounded px-4 py-3 text-right text-white font-bold text-lg">
-                            {formatNumber(positionSize)}
+                        <div className="md:col-span-7">
+                        <div className="w-full bg-[#2a2a2a] border border-[#333] rounded px-4 py-3 flex justify-end items-center gap-2">
+                            <span className="text-white font-bold text-lg break-all">
+                                {formatNumber(positionSize)}
+                            </span>
+                            <span className="text-gray-400 text-sm font-medium shrink-0">บาท</span>
                         </div>
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">USDT</span>
                         </div>
                     </div>
 
@@ -264,15 +266,15 @@
                         <li className="flex items-start gap-2 text-gray-300">
                             <span className="block w-1.5 h-1.5 mt-2 rounded-full bg-gray-400 shrink-0"></span>
                             <span>
-                            Position Size ของคุณที่จะต้องเข้าในครั้งนี้คือ <span className="text-white font-bold">{formatNumber(positionSize)} USDT</span>
+                            ขนาดไม้เทรดที่คุณควรเปิดในครั้งนี้คือ <span className="text-white font-bold">{formatNumber(positionSize)} บาท</span>
                             </span>
                         </li>
                         <li className="flex items-start gap-2 text-gray-300">
                             <span className="block w-1.5 h-1.5 mt-2 rounded-full bg-gray-400 shrink-0"></span>
                             <span>
-                            หากคุณเทรดแล้วแพ้ในครั้งนี้ คุณจะเหลือโอกาสอีก <span className="text-white font-bold">{remainingTrades} ครั้ง</span>
+                            หากไม้เทรดนี้ขาดทุน คุณจะยังเหลือโอกาสเทรดได้อีก <span className="text-white font-bold">{remainingTrades} ครั้ง</span>
                             <br/>
-                            <span className="text-xs text-gray-500">(ความเสียหายสูงสุดต่อไม้: {formatNumber(riskAmount)} USDT)</span>
+                            <span className="text-xs text-gray-500">(ความเสียหายสูงสุดต่อไม้: {formatNumber(riskAmount)} บาท)</span>
                             </span>
                         </li>
                         </ul>
@@ -286,13 +288,13 @@
                             className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/20"
                         >
                             <SparklesIcon className="w-4 h-4" />
-                            วิเคราะห์ความเสี่ยงด้วย AI (Gemini)
+                            ให้ AI (Gemini) ช่วยวิเคราะห์ความเสี่ยง
                         </button>
                         ) : (
                         <div className="bg-[#2a2a2a] rounded-lg p-5 border border-indigo-500/30">
                             <div className="flex items-center gap-2 mb-3 text-indigo-400 font-semibold">
                             <SparklesIcon className="w-4 h-4" />
-                            <span>AI Risk Analysis</span>
+                            <span>บทวิเคราะห์ความเสี่ยงจาก AI</span>
                             </div>
                             
                             {isLoading ? (
